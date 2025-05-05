@@ -3,12 +3,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { signIn, getSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -17,11 +18,12 @@ import {
 import { Input } from "@/components/ui/input";
 
 const formSchema = z.object({
-  username: z.string().max(50), // Champ pour le nom d'utilisateur ou l'adresse e-mail
-  password: z.string().max(50),
+  username: z.string().max(50, "Username must be 50 characters or less"),
+  password: z.string().max(50, "Password must be 50 characters or less"),
 });
 
 export function SignInForm() {
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -30,8 +32,31 @@ export function SignInForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const res = await signIn("credentials", {
+      username: values.username,
+      password: values.password,
+      redirect: false,
+    });
+
+    if (res?.ok) {
+      // Recharge la session pour avoir l'utilisateur connecté
+      const session = await getSession();
+
+      if (!session?.user?.role) {
+        console.error("User role not found");
+        return;
+      }
+
+      if (session.user.role === "consultant") {
+        router.push("/consultant");
+      } else if (session.user.role === "client") {
+        router.push("/client");
+      }
+    } else {
+      console.error("Login failed:", res);
+      // Afficher un message d'erreur à l'utilisateur
+    }
   }
 
   return (

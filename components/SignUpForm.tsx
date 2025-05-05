@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -21,32 +20,54 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 import { Input } from "@/components/ui/input";
+import { useState } from "react";
 
-const formSchema = z
-  .object({
-    username: z.string().max(50),
-    password: z.string().max(50),
-    passwordAgain: z.string().max(50),
-  })
-  .refine((data) => data.password === data.passwordAgain, {
-    message: "Passwords don't match",
-    path: ["passwordAgain"],
-  });
+const formSchema = z.object({
+  username: z
+    .string()
+    .max(50, "Username must be 50 characters or less")
+    .nonempty("Username is required"),
+  password: z
+    .string()
+    .min(6, "Password must be at least 6 characters long")
+    .max(50),
+  role: z.string().nonempty("Role is required"),
+});
 
 export function SignUpForm() {
+  const [isSubmit, setIsSubmit] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
       password: "",
-      passwordAgain: "",
+      role: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      // Make an API call to your server-side endpoint that handles database operations
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to sign up");
+      }
+
+      setIsSubmit(true);
+      setErrorMessage("");
+    } catch (error) {
+      setErrorMessage("Failed to create account. Please try again.");
+    }
   }
 
   return (
@@ -83,33 +104,36 @@ export function SignUpForm() {
         />
         <FormField
           control={form.control}
-          name="passwordAgain"
+          name="role"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-white">Confirm Password</FormLabel>
-              <FormControl>
-                <Input className="text-white" type="password" {...field} />
-              </FormControl>
+              <FormLabel className="text-white">Role</FormLabel>
+              <Select {...field} onValueChange={field.onChange}>
+                <FormControl>
+                  <SelectTrigger className="w-[180px] text-white">
+                    <SelectValue
+                      placeholder="Who are you?"
+                      className="text-white"
+                    />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="bg-[#1A1A1A]">
+                  <SelectItem value="client" className="text-white">
+                    Client
+                  </SelectItem>
+                  <SelectItem value="consultant" className="text-white">
+                    Consultant
+                  </SelectItem>
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
         />
-
-        <div className="flex flex-col gap-4 items-center justify-center">
-          <Select>
-            <SelectTrigger className="w-[180px] text-white">
-              <SelectValue placeholder="Who are you ?" className="text-white" />
-            </SelectTrigger>
-            <SelectContent className="bg-[#1A1A1A]">
-              <SelectItem value="client" className="text-white">
-                Client
-              </SelectItem>
-              <SelectItem value="consultant" className="text-white">
-                Consultant
-              </SelectItem>
-            </SelectContent>
-          </Select>
-
+        {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+        {isSubmit ? (
+          <p className="text-white">Account created!</p>
+        ) : (
           <Button
             type="submit"
             className="cursor-pointer bg-white text-black hover:bg-gray-200/90 flex items-center justify-center"
@@ -117,7 +141,7 @@ export function SignUpForm() {
           >
             Submit
           </Button>
-        </div>
+        )}
       </form>
     </Form>
   );
