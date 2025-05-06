@@ -1,11 +1,39 @@
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 
+// Étendre les types par défaut
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      username: string;
+      role: string;
+      email?: string | null;
+      image?: string | null;
+      name?: string | null;
+    };
+  }
+
+  interface User {
+    id: string;
+    username: string;
+    role: string;
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    id: string;
+    username: string;
+    role: string;
+  }
+}
+
 const prisma = new PrismaClient();
 
-export const authOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -36,8 +64,9 @@ export const authOptions = {
           throw new Error("Invalid password");
         }
 
+        // Retourne un objet correspondant à l'interface User définie plus haut
         return {
-          id: user.id,
+          id: String(user.id), // Conversion en string si nécessaire
           username: user.username,
           role: user.role,
         };
@@ -76,4 +105,4 @@ export const authOptions = {
 
 const handler = NextAuth(authOptions);
 
-export { handler as GET, handler as POST, authOptions };
+export { handler as GET, handler as POST };

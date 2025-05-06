@@ -1,0 +1,201 @@
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+
+// Liste des jours de la semaine
+const weekDays = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+] as const;
+
+const formSchema = z.object({
+  startHour: z.number().min(0).max(23),
+  startMinutes: z.number().min(0).max(59),
+  endHour: z.number().min(0).max(23),
+  endMinutes: z.number().min(0).max(59),
+  day: z.enum(weekDays),
+});
+
+type Availability = z.infer<typeof formSchema>;
+
+export function AvailabilityPicker({
+  onSubmit,
+}: {
+  onSubmit: (data: Availability) => void;
+}) {
+  const form = useForm<Availability>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      startHour: 0,
+      startMinutes: 0,
+      endHour: 0,
+      endMinutes: 0,
+      day: "Monday",
+    },
+  });
+
+  function handleSubmit(values: Availability) {
+    onSubmit(values);
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+        {/* Start Hour */}
+        <FormField
+          control={form.control}
+          name="startHour"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Start Hour</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  min={0}
+                  max={23}
+                  placeholder="0"
+                  {...field}
+                  onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
+                />
+              </FormControl>
+              <FormDescription>Between 0 and 23</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Start Minutes */}
+        <FormField
+          control={form.control}
+          name="startMinutes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Start Minutes</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  min={0}
+                  max={59}
+                  placeholder="0"
+                  {...field}
+                  onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
+                />
+              </FormControl>
+              <FormDescription>Between 0 and 59</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* End Hour */}
+        <FormField
+          control={form.control}
+          name="endHour"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>End Hour</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  min={0}
+                  max={23}
+                  placeholder="0"
+                  {...field}
+                  onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
+                />
+              </FormControl>
+              <FormDescription>Between 0 and 23</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* End Minutes */}
+        <FormField
+          control={form.control}
+          name="endMinutes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>End Minutes</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  min={0}
+                  max={59}
+                  placeholder="0"
+                  {...field}
+                  onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
+                />
+              </FormControl>
+              <FormDescription>Between 0 and 59</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Day Selection */}
+        <FormField
+          control={form.control}
+          name="day"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Day</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select a day" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {weekDays.map((day) => (
+                    <SelectItem key={day} value={day}>
+                      {day}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Submit */}
+        <div className="flex justify-center">
+          <Button
+            type="submit"
+            className="cursor-pointer bg-white text-black hover:bg-gray-200/90"
+            size="lg"
+          >
+            Submit
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+}

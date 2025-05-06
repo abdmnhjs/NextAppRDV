@@ -65,7 +65,7 @@ export function SignUpForm() {
 
       setIsSubmit(true);
       setErrorMessage("");
-    } catch (error) {
+    } catch {
       setErrorMessage("Failed to create account. Please try again.");
     }
   }

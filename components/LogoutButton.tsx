@@ -12,7 +12,7 @@ interface LogoutButtonProps {
 const LogoutButton = ({ children }: LogoutButtonProps) => {
   return (
     <Button
-      className="cursor-pointer bg-red text-white hover:bg-gray-200/90 flex items-center justify-center"
+      className="cursor-pointer bg-red-500 text-white hover:bg-red-300/90 flex items-center justify-center m-2"
       onClick={() => signOut()}
     >
       {children}
