@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
@@ -25,7 +26,13 @@ export const authOptions = {
           throw new Error("No user found");
         }
 
-        if (user.password !== credentials.password) {
+        // Vérification du mot de passe hashé avec bcrypt
+        const passwordMatch = await bcrypt.compare(
+          credentials.password,
+          user.password
+        );
+
+        if (!passwordMatch) {
           throw new Error("Invalid password");
         }
 
@@ -52,7 +59,7 @@ export const authOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.username = user.username; // Assure-toi que le username est bien ajouté au token
+        token.username = user.username;
         token.role = user.role;
       }
       return token;

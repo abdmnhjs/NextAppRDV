@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
 
 // Initialize Prisma Client
 const prisma = new PrismaClient();
@@ -17,11 +18,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create the user in the database
+    // Hash the password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Create the user in the database with hashed password
     const user = await prisma.user.create({
       data: {
         username,
-        password, // Note: In a production app, you should hash passwords
+        password: hashedPassword, // Storing the hashed password
         role,
       },
     });
