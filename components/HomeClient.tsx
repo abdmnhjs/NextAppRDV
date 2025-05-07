@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation"; // Import du router Next.js
 import LogoutButton from "./LogoutButton";
 import { Button } from "./ui/button";
-import AvailabilitiesForClientDialog from "./AvailbitiesForClientDialog";
 
 type Props = {
   username: string;
@@ -16,7 +16,7 @@ type Consultant = {
 
 export default function HomeClient({ username }: Props) {
   const [consultants, setConsultants] = useState<Consultant[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const router = useRouter(); // Initialisation du router
 
   useEffect(() => {
     const fetchConsultants = async () => {
@@ -32,6 +32,11 @@ export default function HomeClient({ username }: Props) {
     fetchConsultants();
   }, []);
 
+  // Fonction pour gérer la navigation vers la page du consultant
+  const handleConsultantClick = (consultant: Consultant) => {
+    router.push(`/client/${consultant.username}`);
+  };
+
   return (
     <div>
       {/* Logout en haut à droite */}
@@ -43,22 +48,19 @@ export default function HomeClient({ username }: Props) {
           <h1 className="text-2xl text-white font-bold">
             Welcome {username} to your client space!
           </h1>
+          <p className="text-xl text-white font-bold">
+            Choose your consultant!
+          </p>
 
           {consultants.map((consultant, index) => (
             <Button
               key={index}
-              onClick={() => setIsDialogOpen(true)}
               className="cursor-pointer bg-white text-black hover:bg-gray-200/90"
+              onClick={() => handleConsultantClick(consultant)}
             >
               {consultant.username}
             </Button>
           ))}
-
-          <AvailabilitiesForClientDialog
-            username={username}
-            isDialogOpen={isDialogOpen}
-            setIsDialogOpen={setIsDialogOpen}
-          />
         </div>
       </div>
     </div>
