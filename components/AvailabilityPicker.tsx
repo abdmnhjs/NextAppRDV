@@ -35,10 +35,10 @@ const weekDays = [
 ] as const;
 
 const formSchema = z.object({
-  startHour: z.number().min(0).max(23),
-  startMinutes: z.number().min(0).max(59),
-  endHour: z.number().min(0).max(23),
-  endMinutes: z.number().min(0).max(59),
+  startHour: z.coerce.number().min(0).max(23),
+  startMinutes: z.coerce.number().min(0).max(59),
+  endHour: z.coerce.number().min(0).max(23),
+  endMinutes: z.coerce.number().min(0).max(59),
   day: z.enum(weekDays),
 });
 
@@ -52,9 +52,9 @@ export function AvailabilityPicker({
   const form = useForm<Availability>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      startHour: 0,
+      startHour: 9,
       startMinutes: 0,
-      endHour: 0,
+      endHour: 10,
       endMinutes: 0,
       day: "Monday",
     },
@@ -79,9 +79,13 @@ export function AvailabilityPicker({
                   type="number"
                   min={0}
                   max={23}
-                  placeholder="0"
-                  {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
+                  placeholder="9"
+                  value={field.value || 0}
+                  onChange={(e) => {
+                    const value =
+                      e.target.value === "" ? 0 : parseInt(e.target.value, 10);
+                    field.onChange(isNaN(value) ? 0 : value);
+                  }}
                 />
               </FormControl>
               <FormDescription>Between 0 and 23</FormDescription>
@@ -103,8 +107,12 @@ export function AvailabilityPicker({
                   min={0}
                   max={59}
                   placeholder="0"
-                  {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
+                  value={field.value || 0}
+                  onChange={(e) => {
+                    const value =
+                      e.target.value === "" ? 0 : parseInt(e.target.value, 10);
+                    field.onChange(isNaN(value) ? 0 : value);
+                  }}
                 />
               </FormControl>
               <FormDescription>Between 0 and 59</FormDescription>
@@ -125,9 +133,13 @@ export function AvailabilityPicker({
                   type="number"
                   min={0}
                   max={23}
-                  placeholder="0"
-                  {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
+                  placeholder="10"
+                  value={field.value || 0}
+                  onChange={(e) => {
+                    const value =
+                      e.target.value === "" ? 0 : parseInt(e.target.value, 10);
+                    field.onChange(isNaN(value) ? 0 : value);
+                  }}
                 />
               </FormControl>
               <FormDescription>Between 0 and 23</FormDescription>
@@ -149,8 +161,12 @@ export function AvailabilityPicker({
                   min={0}
                   max={59}
                   placeholder="0"
-                  {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
+                  value={field.value || 0}
+                  onChange={(e) => {
+                    const value =
+                      e.target.value === "" ? 0 : parseInt(e.target.value, 10);
+                    field.onChange(isNaN(value) ? 0 : value);
+                  }}
                 />
               </FormControl>
               <FormDescription>Between 0 and 59</FormDescription>
