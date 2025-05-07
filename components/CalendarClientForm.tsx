@@ -22,14 +22,36 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const FormSchema = z.object({
   doa: z.date({
     required_error: "A date of appointment is required",
   }),
+  duration: z.string({
+    required_error: "A duration is required",
+  }),
 });
 
-export function CalendarClientForm() {
+type ConsultancyDuration = {
+  startHour: number;
+  startMinutes: number;
+  endHour: number;
+  endMinutes: number;
+};
+
+type Props = {
+  days: string[]; // ["Monday", "Wednesday"]
+  durations: ConsultancyDuration[];
+};
+
+export function CalendarClientForm({ days, durations }: Props) {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
@@ -37,6 +59,11 @@ export function CalendarClientForm() {
   function onSubmit(data: z.infer<typeof FormSchema>) {
     console.log("Form submitted:", data);
   }
+
+  const isDateAllowed = (date: Date) => {
+    const weekday = format(date, "EEEE");
+    return days.includes(weekday);
+  };
 
   return (
     <Form {...form}>
@@ -46,7 +73,9 @@ export function CalendarClientForm() {
           name="doa"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Date of your future appointment</FormLabel>
+              <FormLabel className="text-white font-bold">
+                Date of your future appointment
+              </FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -70,11 +99,10 @@ export function CalendarClientForm() {
                   <Calendar
                     mode="single"
                     selected={field.value}
-                    onSelect={(date) => {
-                      field.onChange(date); // Met à jour le champ du formulaire
-                      console.log("Date selected:", date);
-                    }}
-                    disabled={(date) => date < new Date()} // Désactive les dates avant aujourd'hui
+                    onSelect={field.onChange}
+                    disabled={(date) =>
+                      !isDateAllowed(date) || date < new Date()
+                    }
                     className="rounded-md border"
                   />
                 </PopoverContent>
@@ -83,7 +111,51 @@ export function CalendarClientForm() {
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+
+        <FormField
+          control={form.control}
+          name="duration"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-white font-bold">
+                Choose a time that works for you
+              </FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger className="w-[180px] text-white">
+                    <SelectValue
+                      placeholder="Select a time slot"
+                      className="text-white"
+                    />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="bg-[#1A1A1A]">
+                  {durations.map((duration, index) => (
+                    <SelectItem
+                      className="text-white"
+                      key={index}
+                      value={String(index)}
+                    >
+                      {String(duration.startHour).padStart(2, "0")}h
+                      {String(duration.startMinutes).padStart(2, "0")} -{" "}
+                      {String(duration.endHour).padStart(2, "0")}h
+                      {String(duration.endMinutes).padStart(2, "0")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button
+          type="submit"
+          className="cursor-pointer bg-white text-black hover:bg-gray-200/90"
+          size="lg"
+        >
+          Submit
+        </Button>
       </form>
     </Form>
   );

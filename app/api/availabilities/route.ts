@@ -1,22 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-
 const prisma = new PrismaClient();
+
+// Helper to get consultant ID from id or username
+async function getConsultantId(id: string | null, username: string | null) {
+  if (id) return Number(id);
+  if (username) {
+    const consultant = await prisma.user.findUnique({
+      where: { username },
+    });
+    return consultant?.id || null;
+  }
+  return null;
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
+  const username = searchParams.get("username");
 
-  if (!id) {
+  const consultantId = await getConsultantId(id, username);
+  if (!consultantId) {
     return NextResponse.json(
-      { error: "Consultant ID is required" },
+      { error: "Consultant ID or username is required" },
       { status: 400 }
     );
   }
 
   try {
     const availabilities = await prisma.availability.findMany({
-      where: { consultantId: Number(id) },
+      where: { consultantId },
     });
     return NextResponse.json(availabilities);
   } catch {
@@ -28,12 +41,20 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const { id, availability } = await request.json();
+  const { id, username, availability } = await request.json();
+  const consultantId = await getConsultantId(id, username);
+
+  if (!consultantId) {
+    return NextResponse.json(
+      { error: "Consultant ID or username is required" },
+      { status: 400 }
+    );
+  }
 
   try {
     const newAvailability = await prisma.availability.create({
       data: {
-        consultantId: id,
+        consultantId,
         ...availability,
       },
     });
@@ -47,12 +68,20 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const { id, availability } = await request.json();
+  const { id, username, availability } = await request.json();
+  const consultantId = await getConsultantId(id, username);
+
+  if (!consultantId) {
+    return NextResponse.json(
+      { error: "Consultant ID or username is required" },
+      { status: 400 }
+    );
+  }
 
   try {
     await prisma.availability.deleteMany({
       where: {
-        consultantId: id,
+        consultantId,
         ...availability,
       },
     });

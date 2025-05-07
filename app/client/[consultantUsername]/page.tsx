@@ -4,6 +4,24 @@ import { useRouter } from "next/navigation";
 import LogoutButton from "@/components/LogoutButton";
 import { Button } from "@/components/ui/button";
 import React, { useEffect, useState } from "react";
+import { CalendarClientForm } from "@/components/CalendarClientForm";
+
+type WeekDay =
+  | "Monday"
+  | "Tuesday"
+  | "Wednesday"
+  | "Thursday"
+  | "Friday"
+  | "Saturday"
+  | "Sunday";
+
+type AvailabilityType = {
+  day: WeekDay;
+  startHour: number;
+  startMinutes: number;
+  endHour: number;
+  endMinutes: number;
+};
 
 export default function ConsultantPage({
   params,
@@ -12,29 +30,51 @@ export default function ConsultantPage({
 }) {
   const router = useRouter();
   const [decodedUsername, setDecodedUsername] = useState<string>("");
+  const [availabilities, setAvailabilities] = useState<AvailabilityType[]>([]);
 
   useEffect(() => {
-    // Handle the promise to get the params
     params.then((unwrappedParams) => {
-      // Décodage du nom d'utilisateur pour afficher correctement les espaces et caractères spéciaux
       const username = decodeURIComponent(unwrappedParams.consultantUsername);
       setDecodedUsername(username);
     });
   }, [params]);
 
-  // Fonction pour retourner à la liste des consultants
+  useEffect(() => {
+    const fetchAvailabilities = async () => {
+      try {
+        const response = await fetch(
+          `/api/availabilities?username=${encodeURIComponent(decodedUsername)}`
+        );
+        const data = await response.json();
+        setAvailabilities(data);
+      } catch (error) {
+        console.error("Failed to fetch availabilities:", error);
+      }
+    };
+
+    if (decodedUsername) {
+      fetchAvailabilities();
+    }
+  }, [decodedUsername]);
+
   const handleBackClick = () => {
     router.push("/client");
   };
 
+  const days = availabilities.map((availability) => availability.day);
+  const durations = availabilities.map((availability) => ({
+    startHour: availability.startHour,
+    startMinutes: availability.startMinutes,
+    endHour: availability.endHour,
+    endMinutes: availability.endMinutes,
+  }));
+
   return (
     <div>
-      {/* Logout en haut à droite */}
       <div className="absolute top-4 right-4">
         <LogoutButton>Sign out</LogoutButton>
       </div>
 
-      {/* Bouton de retour en haut à gauche */}
       <div className="absolute top-4 left-4">
         <Button
           variant="outline"
@@ -50,6 +90,7 @@ export default function ConsultantPage({
           <h1 className="text-2xl text-white font-bold">
             Consultant : {decodedUsername}
           </h1>
+          <CalendarClientForm days={days} durations={durations} />
         </div>
       </div>
     </div>
