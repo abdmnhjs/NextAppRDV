@@ -16,6 +16,7 @@ type WeekDay =
   | "Sunday";
 
 type AvailabilityType = {
+  id: number;
   day: WeekDay;
   startHour: number;
   startMinutes: number;
@@ -27,36 +28,43 @@ type AvailabilityType = {
 export default function ConsultantPage({
   params,
 }: {
-  params: Promise<{ consultantUsername: string }>;
+  params: { consultantUsername: string };
 }) {
   const router = useRouter();
-  const [decodedUsername, setDecodedUsername] = useState<string>("");
+  const [consultantUsername, setConsultantUsername] = useState<string>("");
+  const [clientUsername, setClientUsername] = useState<string>("");
   const [availabilities, setAvailabilities] = useState<AvailabilityType[]>([]);
 
   useEffect(() => {
-    params.then((unwrappedParams) => {
-      const username = decodeURIComponent(unwrappedParams.consultantUsername);
-      setDecodedUsername(username);
-    });
+    const username = decodeURIComponent(params.consultantUsername);
+    setConsultantUsername(username);
+
+    const storedClientUsername = sessionStorage.getItem("clientUsername");
+    if (storedClientUsername) {
+      setClientUsername(storedClientUsername);
+    }
   }, [params]);
 
   useEffect(() => {
     const fetchAvailabilities = async () => {
       try {
         const response = await fetch(
-          `/api/availabilities?username=${encodeURIComponent(decodedUsername)}`
+          `/api/availabilities?username=${encodeURIComponent(
+            consultantUsername
+          )}`
         );
         const data = await response.json();
-        setAvailabilities(data);
+        setAvailabilities(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Failed to fetch availabilities:", error);
+        setAvailabilities([]);
       }
     };
 
-    if (decodedUsername) {
+    if (consultantUsername) {
       fetchAvailabilities();
     }
-  }, [decodedUsername]);
+  }, [consultantUsername]);
 
   const handleBackClick = () => {
     router.push("/client");
@@ -70,7 +78,7 @@ export default function ConsultantPage({
       startMinutes: availability.startMinutes,
       endHour: availability.endHour,
       endMinutes: availability.endMinutes,
-      booked: availability.booked,
+      availabilityId: availability.id,
     }));
 
   return (
@@ -92,9 +100,21 @@ export default function ConsultantPage({
       <div className="flex min-h-screen items-center justify-center">
         <div className="flex flex-col items-center justify-center space-y-4">
           <h1 className="text-2xl text-white font-bold">
-            Consultant : {decodedUsername}
+            Consultant: {consultantUsername}
           </h1>
-          <CalendarClientForm days={days} durations={durations} />
+          {clientUsername && (
+            <p className="text-lg text-white">Client: {clientUsername}</p>
+          )}
+          {durations.length > 0 ? (
+            <CalendarClientForm
+              days={days}
+              durations={durations}
+              clientUsername={clientUsername}
+              consultantUsername={consultantUsername}
+            />
+          ) : (
+            <p className="text-white">No available time slots.</p>
+          )}
         </div>
       </div>
     </div>

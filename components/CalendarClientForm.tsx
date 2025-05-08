@@ -44,20 +44,56 @@ type ConsultancyDuration = {
   startMinutes: number;
   endHour: number;
   endMinutes: number;
+  availabilityId: number;
 };
 
 type Props = {
-  days: string[]; // ["Monday", "Wednesday"]
+  days: string[];
   durations: ConsultancyDuration[];
+  clientUsername: string;
+  consultantUsername: string;
 };
 
-export function CalendarClientForm({ days, durations }: Props) {
+export function CalendarClientForm({
+  days,
+  durations,
+  clientUsername,
+  consultantUsername,
+}: Props) {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    console.log("Form submitted:", data);
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    try {
+      const selectedDuration = durations[parseInt(data.duration)];
+
+      const response = await fetch("/api/appointments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          consultantUsername,
+          clientUsername,
+          availabilityId: selectedDuration.availabilityId,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          `Failed to create appointment: ${
+            errorData.message || "Unknown error"
+          }`
+        );
+      }
+
+      const result = await response.json();
+      console.log("Appointment created:", result);
+    } catch (error) {
+      console.error("Error creating appointment:", error);
+    }
   }
 
   const isDateAllowed = (date: Date) => {
@@ -120,13 +156,10 @@ export function CalendarClientForm({ days, durations }: Props) {
               <FormLabel className="text-white font-bold">
                 Choose a time that works for you
               </FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger className="w-[180px] text-white">
-                    <SelectValue
-                      placeholder="Select a time slot"
-                      className="text-white"
-                    />
+                    <SelectValue placeholder="Select a time slot" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent className="bg-[#1A1A1A]">

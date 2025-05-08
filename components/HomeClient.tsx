@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation"; // Import du router Next.js
+import { useRouter } from "next/navigation";
 import LogoutButton from "./LogoutButton";
 import { Button } from "./ui/button";
 
@@ -16,7 +16,7 @@ type Consultant = {
 
 export default function HomeClient({ username }: Props) {
   const [consultants, setConsultants] = useState<Consultant[]>([]);
-  const router = useRouter(); // Initialisation du router
+  const router = useRouter();
 
   useEffect(() => {
     const fetchConsultants = async () => {
@@ -32,14 +32,16 @@ export default function HomeClient({ username }: Props) {
     fetchConsultants();
   }, []);
 
-  // Fonction pour gérer la navigation vers la page du consultant
+  // Function to handle navigation to the consultant page
   const handleConsultantClick = (consultant: Consultant) => {
+    // Store client username in sessionStorage so it's available in ConsultantPage
+    sessionStorage.setItem("clientUsername", username);
     router.push(`/client/${consultant.username}`);
   };
 
   return (
     <div>
-      {/* Logout en haut à droite */}
+      {/* Logout in top right */}
       <div className="absolute top-4 right-4">
         <LogoutButton>Sign out</LogoutButton>
       </div>
