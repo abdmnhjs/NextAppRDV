@@ -13,6 +13,8 @@ model User {
   password       String
   role           String
   availabilities Availability[]
+  consultantAppointments Appointment[] @relation("ConsultantAppointments")
+  clientAppointments      Appointment[] @relation("ClientAppointments")
 }
 
 model Availability {
@@ -23,5 +25,17 @@ model Availability {
   endHour      Int
   endMinutes   Int
   day          String
+  booked       Boolean @default(false)
   consultant   User   @relation(fields: [consultantId], references: [id])
+  appointments Appointment[]
+}
+
+model Appointment {
+  id          Int    @id @default(autoincrement())
+  consultantUsername String
+  clientUsername String
+  availabilityId Int
+  consultant User @relation("ConsultantAppointments", fields: [consultantUsername], references: [username])
+  client User @relation("ClientAppointments", fields: [clientUsername], references: [username])
+  availability Availability @relation(fields: [availabilityId], references: [id])
 }

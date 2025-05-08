@@ -21,6 +21,7 @@ type AvailabilityType = {
   startMinutes: number;
   endHour: number;
   endMinutes: number;
+  booked: boolean;
 };
 
 export default function ConsultantPage({
@@ -62,12 +63,15 @@ export default function ConsultantPage({
   };
 
   const days = availabilities.map((availability) => availability.day);
-  const durations = availabilities.map((availability) => ({
-    startHour: availability.startHour,
-    startMinutes: availability.startMinutes,
-    endHour: availability.endHour,
-    endMinutes: availability.endMinutes,
-  }));
+  const durations = availabilities
+    .filter((availability) => !availability.booked)
+    .map((availability) => ({
+      startHour: availability.startHour,
+      startMinutes: availability.startMinutes,
+      endHour: availability.endHour,
+      endMinutes: availability.endMinutes,
+      booked: availability.booked,
+    }));
 
   return (
     <div>
