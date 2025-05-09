@@ -190,10 +190,10 @@ export default function HomeConsultant({ username, id }: Props) {
                   Delete
                 </Button>
                 {item.booked && bookedAppointments[item.id] && (
-                  <label className="bg-blue-500 p-1 rounded-md text-white flex items-center justify-center m-2">
+                  <Button className="bg-blue-500 bg-blue-500 text-white flex items-center justify-center m-2">
                     Booked by:{" "}
                     {bookedAppointments[item.id]?.clientUsername || "Unknown"}
-                  </label>
+                  </Button>
                 )}
               </div>
             ))}
