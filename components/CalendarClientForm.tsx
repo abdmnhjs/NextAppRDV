@@ -40,6 +40,7 @@ const FormSchema = z.object({
 });
 
 type ConsultancyDuration = {
+  day: string;
   startHour: number;
   startMinutes: number;
   endHour: number;
@@ -63,6 +64,15 @@ export function CalendarClientForm({
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
+
+  // Filtrer les horaires en fonction du jour sélectionné
+  const getFilteredDurations = () => {
+    const selectedDate = form.watch("doa");
+    if (!selectedDate) return durations;
+
+    const selectedDay = format(selectedDate, "EEEE");
+    return durations.filter((duration) => duration.day === selectedDay);
+  };
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     try {
@@ -98,6 +108,20 @@ export function CalendarClientForm({
 
   const isDateAllowed = (date: Date) => {
     const weekday = format(date, "EEEE");
+    const selectedDuration = form.watch("duration");
+
+    if (selectedDuration) {
+      const duration = durations[parseInt(selectedDuration)];
+      return durations.some(
+        (d) =>
+          d.day === weekday &&
+          d.startHour === duration.startHour &&
+          d.startMinutes === duration.startMinutes &&
+          d.endHour === duration.endHour &&
+          d.endMinutes === duration.endMinutes
+      );
+    }
+
     return days.includes(weekday);
   };
 
@@ -156,18 +180,28 @@ export function CalendarClientForm({
               <FormLabel className="text-white font-bold">
                 Choose a time that works for you
               </FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value}
+                disabled={!form.watch("doa")}
+              >
                 <FormControl>
                   <SelectTrigger className="w-[180px] text-white">
-                    <SelectValue placeholder="Select a time slot" />
+                    <SelectValue
+                      placeholder={
+                        form.watch("doa")
+                          ? "Select a time slot"
+                          : "Select a date first"
+                      }
+                    />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent className="bg-[#1A1A1A]">
-                  {durations.map((duration, index) => (
+                  {getFilteredDurations().map((duration, index) => (
                     <SelectItem
                       className="text-white"
                       key={index}
-                      value={String(index)}
+                      value={String(durations.indexOf(duration))}
                     >
                       {String(duration.startHour).padStart(2, "0")}h
                       {String(duration.startMinutes).padStart(2, "0")} -{" "}
@@ -186,6 +220,7 @@ export function CalendarClientForm({
           type="submit"
           className="cursor-pointer bg-white text-black hover:bg-gray-200/90"
           size="lg"
+          disabled={!form.watch("doa") || !form.watch("duration")}
         >
           Submit
         </Button>

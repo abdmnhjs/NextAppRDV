@@ -22,16 +22,28 @@ type WeekDay =
   | "Sunday";
 
 type AvailabilityType = {
+  id: number;
   day: WeekDay;
   startHour: number;
   startMinutes: number;
   endHour: number;
   endMinutes: number;
+  booked: boolean;
+};
+
+type AppointmentType = {
+  id: number;
+  consultantUsername: string;
+  clientUsername: string;
+  availabilityId: number;
 };
 
 export default function HomeConsultant({ username, id }: Props) {
   const [availabilities, setAvailabilities] = useState<AvailabilityType[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [bookedAppointments, setBookedAppointments] = useState<
+    Record<number, AppointmentType>
+  >({});
 
   useEffect(() => {
     const fetchAvailabilities = async () => {
@@ -39,6 +51,23 @@ export default function HomeConsultant({ username, id }: Props) {
         const response = await fetch(`/api/availabilities?id=${id}`);
         const data = await response.json();
         setAvailabilities(data);
+
+        // Fetch appointments for booked availabilities
+        const bookedAvailabilities = data.filter(
+          (item: AvailabilityType) => item.booked
+        );
+        console.log("Booked availabilities:", bookedAvailabilities); // Debug log
+
+        for (const availability of bookedAvailabilities) {
+          const appointment = await getBookedBy(availability);
+          console.log("Fetched appointment:", appointment); // Debug log
+          if (appointment) {
+            setBookedAppointments((prev) => ({
+              ...prev,
+              [availability.id]: appointment,
+            }));
+          }
+        }
       } catch (error) {
         console.error("Failed to fetch availabilities:", error);
       }
@@ -47,18 +76,26 @@ export default function HomeConsultant({ username, id }: Props) {
     fetchAvailabilities();
   }, [id]);
 
-  const handleAddAvailability = async (newAvailability: AvailabilityType) => {
+  const handleAddAvailability = async (
+    newAvailability: Omit<AvailabilityType, "id" | "booked">
+  ) => {
     try {
       const response = await fetch("/api/availabilities", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id, availability: newAvailability }),
+        body: JSON.stringify({
+          id,
+          availability: {
+            ...newAvailability,
+            booked: false,
+          },
+        }),
       });
       const data = await response.json();
       setAvailabilities((prev) => [...prev, data]);
-      setIsDialogOpen(false); // Close the modal
+      setIsDialogOpen(false);
     } catch (error) {
       console.error("Failed to add availability:", error);
     }
@@ -74,8 +111,34 @@ export default function HomeConsultant({ username, id }: Props) {
         body: JSON.stringify({ id, availability }),
       });
       setAvailabilities((prev) => prev.filter((item) => item !== availability));
+      // Remove from booked appointments if it was booked
+      if (availability.booked) {
+        setBookedAppointments((prev) => {
+          const newState = { ...prev };
+          delete newState[availability.id];
+          return newState;
+        });
+      }
     } catch (error) {
       console.error("Failed to delete availability:", error);
+    }
+  };
+
+  const getBookedBy = async (
+    availability: AvailabilityType
+  ): Promise<AppointmentType | null> => {
+    try {
+      const response = await fetch(`/api/appointments`);
+      const data = await response.json();
+      console.log("Appointment data:", data); // Debug log
+      // Trouver le rendez-vous qui correspond à cette disponibilité
+      const appointment = data.find(
+        (app: AppointmentType) => app.availabilityId === availability.id
+      );
+      return appointment || null;
+    } catch (error) {
+      console.error("Failed to fetch appointment:", error);
+      return null;
     }
   };
 
@@ -126,6 +189,12 @@ export default function HomeConsultant({ username, id }: Props) {
                 >
                   Delete
                 </Button>
+                {item.booked && bookedAppointments[item.id] && (
+                  <label className="bg-blue-500 p-1 rounded-md text-white flex items-center justify-center m-2">
+                    Booked by:{" "}
+                    {bookedAppointments[item.id]?.clientUsername || "Unknown"}
+                  </label>
+                )}
               </div>
             ))}
           </div>

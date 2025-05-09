@@ -70,16 +70,19 @@ export default function ConsultantPage({
     router.push("/client");
   };
 
-  const days = availabilities.map((availability) => availability.day);
   const durations = availabilities
     .filter((availability) => !availability.booked)
     .map((availability) => ({
+      day: availability.day,
       startHour: availability.startHour,
       startMinutes: availability.startMinutes,
       endHour: availability.endHour,
       endMinutes: availability.endMinutes,
       availabilityId: availability.id,
     }));
+
+  // Récupérer uniquement les jours qui ont des horaires disponibles
+  const availableDays = [...new Set(durations.map((duration) => duration.day))];
 
   return (
     <div>
@@ -107,7 +110,7 @@ export default function ConsultantPage({
           )}
           {durations.length > 0 ? (
             <CalendarClientForm
-              days={days}
+              days={availableDays}
               durations={durations}
               clientUsername={clientUsername}
               consultantUsername={consultantUsername}
