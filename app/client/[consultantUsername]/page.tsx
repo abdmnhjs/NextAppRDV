@@ -36,8 +36,10 @@ export default function ConsultantPage({
   const [availabilities, setAvailabilities] = useState<AvailabilityType[]>([]);
 
   useEffect(() => {
-    const username = decodeURIComponent(params.consultantUsername);
-    setConsultantUsername(username);
+    if (params?.consultantUsername) {
+      const username = decodeURIComponent(params.consultantUsername);
+      setConsultantUsername(username);
+    }
 
     const storedClientUsername = sessionStorage.getItem("clientUsername");
     if (storedClientUsername) {
@@ -47,12 +49,17 @@ export default function ConsultantPage({
 
   useEffect(() => {
     const fetchAvailabilities = async () => {
+      if (!consultantUsername) return;
+
       try {
         const response = await fetch(
           `/api/availabilities?username=${encodeURIComponent(
             consultantUsername
           )}`
         );
+        if (!response.ok) {
+          throw new Error("Failed to fetch availabilities");
+        }
         const data = await response.json();
         setAvailabilities(Array.isArray(data) ? data : []);
       } catch (error) {
@@ -61,9 +68,7 @@ export default function ConsultantPage({
       }
     };
 
-    if (consultantUsername) {
-      fetchAvailabilities();
-    }
+    fetchAvailabilities();
   }, [consultantUsername]);
 
   const handleBackClick = () => {
@@ -81,7 +86,6 @@ export default function ConsultantPage({
       availabilityId: availability.id,
     }));
 
-  // Récupérer uniquement les jours qui ont des horaires disponibles
   const availableDays = [...new Set(durations.map((duration) => duration.day))];
 
   return (

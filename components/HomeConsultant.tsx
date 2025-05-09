@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { AvailabilityPicker } from "@/components/AvailabilityPicker";
 import { DialogTitle } from "@radix-ui/react-dialog";
+import { format } from "date-fns";
 
 interface Props {
   username: string;
@@ -36,6 +37,7 @@ type AppointmentType = {
   consultantUsername: string;
   clientUsername: string;
   availabilityId: number;
+  date: string;
 };
 
 export default function HomeConsultant({ username, id }: Props) {
@@ -135,6 +137,14 @@ export default function HomeConsultant({ username, id }: Props) {
       const appointment = data.find(
         (app: AppointmentType) => app.availabilityId === availability.id
       );
+      console.log("Found appointment:", appointment); // Debug log
+      if (appointment) {
+        console.log("Appointment date:", appointment.date); // Debug log
+        console.log(
+          "Formatted date:",
+          format(new Date(appointment.date), "dd/MM/yyyy")
+        ); // Debug log
+      }
       return appointment || null;
     } catch (error) {
       console.error("Failed to fetch appointment:", error);
@@ -190,10 +200,20 @@ export default function HomeConsultant({ username, id }: Props) {
                   Delete
                 </Button>
                 {item.booked && bookedAppointments[item.id] && (
-                  <Button className="bg-blue-500 bg-blue-500 text-white flex items-center justify-center m-2">
-                    Booked by:{" "}
-                    {bookedAppointments[item.id]?.clientUsername || "Unknown"}
-                  </Button>
+                  <div className="mt-2 p-2 bg-gray-800 rounded-md">
+                    <p className="text-sm text-gray-300">
+                      <span className="font-semibold">Client:</span>{" "}
+                      {bookedAppointments[item.id]?.clientUsername}
+                    </p>
+                    <p className="text-sm text-gray-300">
+                      <span className="font-semibold">Date:</span>{" "}
+                      {bookedAppointments[item.id]?.date &&
+                        format(
+                          new Date(bookedAppointments[item.id].date),
+                          "dd/MM/yyyy"
+                        )}
+                    </p>
+                  </div>
                 )}
               </div>
             ))}

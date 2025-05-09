@@ -87,6 +87,7 @@ export function CalendarClientForm({
           consultantUsername,
           clientUsername,
           availabilityId: selectedDuration.availabilityId,
+          date: data.doa.toISOString(),
         }),
       });
 
@@ -147,7 +148,7 @@ export function CalendarClientForm({
                       )}
                     >
                       {field.value ? (
-                        format(field.value, "PPP")
+                        format(field.value, "dd/MM/yyyy")
                       ) : (
                         <span>Pick a date</span>
                       )}

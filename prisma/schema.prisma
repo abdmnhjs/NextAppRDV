@@ -35,6 +35,7 @@ model Appointment {
   consultantUsername String
   clientUsername String
   availabilityId Int
+  date String
   consultant User @relation("ConsultantAppointments", fields: [consultantUsername], references: [username])
   client User @relation("ClientAppointments", fields: [clientUsername], references: [username])
   availability Availability @relation(fields: [availabilityId], references: [id])

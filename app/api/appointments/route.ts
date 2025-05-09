@@ -12,13 +12,34 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const { consultantUsername, clientUsername, availabilityId } = body;
+    const { consultantUsername, clientUsername, availabilityId, date } = body;
 
     if (!consultantUsername || !clientUsername || !availabilityId) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
+    }
+
+    // Vérifier si les utilisateurs existent
+    const [consultant, client] = await Promise.all([
+      prisma.user.findUnique({
+        where: { username: consultantUsername },
+      }),
+      prisma.user.findUnique({
+        where: { username: clientUsername },
+      }),
+    ]);
+
+    if (!consultant) {
+      return NextResponse.json(
+        { error: "Consultant not found" },
+        { status: 404 }
+      );
+    }
+
+    if (!client) {
+      return NextResponse.json({ error: "Client not found" }, { status: 404 });
     }
 
     const availability = await prisma.availability.findUnique({
@@ -37,6 +58,7 @@ export async function POST(request: NextRequest) {
         consultantUsername,
         clientUsername,
         availabilityId,
+        date: new Date(date).toISOString(),
       },
     });
 
