@@ -25,6 +25,11 @@ type AvailabilityType = {
   booked: boolean;
 };
 
+type AppointmentType = {
+  date: string;
+  availabilityId: number;
+};
+
 export default function ConsultantPage({
   params,
 }: {
@@ -34,6 +39,7 @@ export default function ConsultantPage({
   const [consultantUsername, setConsultantUsername] = useState<string>("");
   const [clientUsername, setClientUsername] = useState<string>("");
   const [availabilities, setAvailabilities] = useState<AvailabilityType[]>([]);
+  const [appointments, setAppointments] = useState<AppointmentType[]>([]);
 
   useEffect(() => {
     if (params?.consultantUsername) {
@@ -68,7 +74,26 @@ export default function ConsultantPage({
       }
     };
 
+    const fetchAppointments = async () => {
+      if (!consultantUsername) return;
+
+      try {
+        const response = await fetch(
+          `/api/appointments?username=${encodeURIComponent(consultantUsername)}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch appointments");
+        }
+        const data = await response.json();
+        setAppointments(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Failed to fetch appointments:", error);
+        setAppointments([]);
+      }
+    };
+
     fetchAvailabilities();
+    fetchAppointments();
   }, [consultantUsername]);
 
   const handleBackClick = () => {
@@ -118,6 +143,7 @@ export default function ConsultantPage({
               durations={durations}
               clientUsername={clientUsername}
               consultantUsername={consultantUsername}
+              appointments={appointments}
             />
           ) : (
             <p className="text-white">No available time slots.</p>

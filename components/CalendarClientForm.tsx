@@ -48,11 +48,17 @@ type ConsultancyDuration = {
   availabilityId: number;
 };
 
+type Appointment = {
+  date: string;
+  availabilityId: number;
+};
+
 type Props = {
   days: string[];
   durations: ConsultancyDuration[];
   clientUsername: string;
   consultantUsername: string;
+  appointments: Appointment[];
 };
 
 export function CalendarClientForm({
@@ -60,6 +66,7 @@ export function CalendarClientForm({
   durations,
   clientUsername,
   consultantUsername,
+  appointments,
 }: Props) {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -111,6 +118,23 @@ export function CalendarClientForm({
     const weekday = format(date, "EEEE");
     const selectedDuration = form.watch("duration");
 
+    // Vérifier si le jour de la semaine est disponible
+    if (!days.includes(weekday)) {
+      return false;
+    }
+
+    // Vérifier si la date est déjà réservée
+    const dateStr = format(date, "yyyy-MM-dd");
+    const isDateBooked = appointments.some((appointment) => {
+      const appointmentDate = new Date(appointment.date);
+      return format(appointmentDate, "yyyy-MM-dd") === dateStr;
+    });
+
+    if (isDateBooked) {
+      return false;
+    }
+
+    // Si une durée est sélectionnée, vérifier si elle est disponible pour ce jour
     if (selectedDuration) {
       const duration = durations[parseInt(selectedDuration)];
       return durations.some(
@@ -123,7 +147,7 @@ export function CalendarClientForm({
       );
     }
 
-    return days.includes(weekday);
+    return true;
   };
 
   return (
