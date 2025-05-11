@@ -30,6 +30,7 @@ type AvailabilityType = {
   endHour: number;
   endMinutes: number;
   booked: boolean;
+  includePayment: boolean;
 };
 
 type AppointmentType = {
@@ -82,6 +83,15 @@ export default function HomeConsultant({ username, id }: Props) {
     newAvailability: Omit<AvailabilityType, "id" | "booked">
   ) => {
     try {
+      console.log("Sending availability data:", {
+        id,
+        availability: {
+          ...newAvailability,
+          booked: false,
+          includePayment: newAvailability.includePayment ?? false,
+        },
+      });
+
       const response = await fetch("/api/availabilities", {
         method: "POST",
         headers: {
@@ -92,14 +102,31 @@ export default function HomeConsultant({ username, id }: Props) {
           availability: {
             ...newAvailability,
             booked: false,
+            includePayment: newAvailability.includePayment ?? false,
           },
         }),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(
+          `HTTP error! status: ${response.status}, message: ${
+            errorData?.message || "Unknown error"
+          }`
+        );
+      }
+
       const data = await response.json();
+      console.log("New availability data:", data);
       setAvailabilities((prev) => [...prev, data]);
       setIsDialogOpen(false);
     } catch (error) {
       console.error("Failed to add availability:", error);
+      alert(
+        `Failed to add availability: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     }
   };
 
@@ -189,9 +216,10 @@ export default function HomeConsultant({ username, id }: Props) {
                   <strong>{item.day}</strong>
                 </p>
                 <p>
-                  {item.startHour}h
-                  {item.startMinutes.toString().padStart(2, "0")} -{" "}
-                  {item.endHour}h{item.endMinutes.toString().padStart(2, "0")}
+                  {item.startHour ?? 0}h
+                  {String(item.startMinutes ?? 0).padStart(2, "0")} -{" "}
+                  {item.endHour ?? 0}h
+                  {String(item.endMinutes ?? 0).padStart(2, "0")}
                 </p>
                 <Button
                   className="cursor-pointer bg-gray-500 text-white hover:bg-red-300/90 flex items-center justify-center m-2"

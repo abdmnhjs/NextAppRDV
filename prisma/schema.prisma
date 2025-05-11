@@ -26,6 +26,7 @@ model Availability {
   endMinutes   Int
   day          String
   booked       Boolean @default(false)
+  includePayment Boolean @default(false)
   consultant   User   @relation(fields: [consultantId], references: [id])
   appointments Appointment[]
 }

@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 
 // Liste des jours de la semaine
 const weekDays = [
@@ -40,6 +41,7 @@ const formSchema = z.object({
   endHour: z.coerce.number().min(0).max(23),
   endMinutes: z.coerce.number().min(0).max(59),
   day: z.enum(weekDays),
+  includePayment: z.boolean(),
 });
 
 type Availability = z.infer<typeof formSchema>;
@@ -57,6 +59,7 @@ export function AvailabilityPicker({
       endHour: 10,
       endMinutes: 0,
       day: "Monday",
+      includePayment: false,
     },
   });
 
@@ -201,6 +204,21 @@ export function AvailabilityPicker({
           )}
         />
 
+        <FormField
+          control={form.control}
+          name="includePayment"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Include payment</FormLabel>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
         {/* Submit */}
         <div className="flex justify-center">
           <Button
