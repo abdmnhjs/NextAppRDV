@@ -59,6 +59,7 @@ export async function POST(request: NextRequest) {
         clientUsername,
         availabilityId,
         date: new Date(date).toISOString(),
+        
       },
     });
 

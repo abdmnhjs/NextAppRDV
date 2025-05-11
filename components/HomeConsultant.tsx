@@ -132,14 +132,42 @@ export default function HomeConsultant({ username, id }: Props) {
 
   const handleDeleteAvailability = async (availability: AvailabilityType) => {
     try {
-      await fetch("/api/availabilities", {
+      console.log("Attempting to delete availability:", availability);
+
+      const response = await fetch("/api/availabilities", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id, availability }),
+        body: JSON.stringify({
+          id,
+          availability: {
+            id: availability.id,
+            day: availability.day,
+            startHour: availability.startHour,
+            startMinutes: availability.startMinutes,
+            endHour: availability.endHour,
+            endMinutes: availability.endMinutes,
+            booked: availability.booked,
+            includePayment: availability.includePayment,
+          },
+        }),
       });
-      setAvailabilities((prev) => prev.filter((item) => item !== availability));
+
+      const data = await response.json();
+      console.log("Response from server:", data);
+
+      if (!response.ok) {
+        const errorMessage =
+          data.error || data.details || "Failed to delete availability";
+        console.error("Server error:", errorMessage);
+        throw new Error(errorMessage);
+      }
+
+      console.log("Successfully deleted availability:", data);
+      setAvailabilities((prev) =>
+        prev.filter((item) => item.id !== availability.id)
+      );
       // Remove from booked appointments if it was booked
       if (availability.booked) {
         setBookedAppointments((prev) => {
@@ -150,6 +178,10 @@ export default function HomeConsultant({ username, id }: Props) {
       }
     } catch (error) {
       console.error("Failed to delete availability:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      console.error("Detailed error:", errorMessage);
+      alert(`Failed to delete availability: ${errorMessage}`);
     }
   };
 
