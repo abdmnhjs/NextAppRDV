@@ -64,6 +64,7 @@ export async function POST(request: NextRequest) {
         endMinutes: availability.endMinutes,
         booked: availability.booked,
         includePayment: availability.includePayment ?? false,
+        price: availability.price ?? 0,
       },
     });
     return NextResponse.json(newAvailability, { status: 201 });

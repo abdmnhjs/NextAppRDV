@@ -85,6 +85,13 @@ export function CalendarClientForm({
     try {
       const selectedDuration = durations[parseInt(data.duration)];
 
+      if (!selectedDuration) {
+        throw new Error("Invalid duration selected");
+      }
+
+      // Formater la date au format YYYY-MM-DD
+      const formattedDate = format(data.doa, "yyyy-MM-dd");
+
       const response = await fetch("/api/appointments", {
         method: "POST",
         headers: {
@@ -94,23 +101,31 @@ export function CalendarClientForm({
           consultantUsername,
           clientUsername,
           availabilityId: selectedDuration.availabilityId,
-          date: data.doa.toISOString(),
+          date: formattedDate,
         }),
       });
 
+      const responseData = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
         throw new Error(
-          `Failed to create appointment: ${
-            errorData.message || "Unknown error"
-          }`
+          responseData.message ||
+            responseData.error ||
+            "Failed to create appointment"
         );
       }
 
-      const result = await response.json();
-      console.log("Appointment created:", result);
+      console.log("Appointment created successfully:", responseData);
+
+      // Rediriger vers une page de succès ou rafraîchir la page
+      window.location.reload();
     } catch (error) {
       console.error("Error creating appointment:", error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to create appointment. Please try again."
+      );
     }
   }
 

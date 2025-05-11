@@ -31,6 +31,7 @@ type AvailabilityType = {
   endMinutes: number;
   booked: boolean;
   includePayment: boolean;
+  price?: number;
 };
 
 type AppointmentType = {
@@ -103,6 +104,7 @@ export default function HomeConsultant({ username, id }: Props) {
             ...newAvailability,
             booked: false,
             includePayment: newAvailability.includePayment ?? false,
+            price: newAvailability.price ?? 0,
           },
         }),
       });
