@@ -42,6 +42,7 @@ const formSchema = z.object({
   endMinutes: z.coerce.number().min(0).max(59),
   day: z.enum(weekDays),
   includePayment: z.boolean(),
+  price: z.coerce.number().min(0).optional(),
 });
 
 type Availability = z.infer<typeof formSchema>;
@@ -60,12 +61,15 @@ export function AvailabilityPicker({
       endMinutes: 0,
       day: "Monday",
       includePayment: false,
+      price: 0,
     },
   });
 
   function handleSubmit(values: Availability) {
     onSubmit(values);
   }
+
+  const includePayment = form.watch("includePayment");
 
   return (
     <Form {...form}>
@@ -219,6 +223,35 @@ export function AvailabilityPicker({
             </FormItem>
           )}
         />
+
+        {includePayment && (
+          <FormField
+            control={form.control}
+            name="price"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Price</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    placeholder="0.00"
+                    value={field.value || ""}
+                    onChange={(e) => {
+                      const value =
+                        e.target.value === "" ? 0 : parseFloat(e.target.value);
+                      field.onChange(isNaN(value) ? 0 : value);
+                    }}
+                  />
+                </FormControl>
+
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
         {/* Submit */}
         <div className="flex justify-center">
           <Button

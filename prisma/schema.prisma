@@ -27,6 +27,7 @@ model Availability {
   day          String
   booked       Boolean @default(false)
   includePayment Boolean @default(false)
+  price        Float?
   consultant   User   @relation(fields: [consultantId], references: [id])
   appointments Appointment[]
 }
