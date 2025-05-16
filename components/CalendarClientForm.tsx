@@ -87,6 +87,9 @@ export function CalendarClientForm({
     try {
       const selectedDuration = durations[parseInt(data.duration)];
 
+      if (selectedDuration.includePayment) {
+      }
+
       if (!selectedDuration) {
         throw new Error("Invalid duration selected");
       }
@@ -250,7 +253,7 @@ export function CalendarClientForm({
                       {String(duration.endHour).padStart(2, "0")}h
                       {String(duration.endMinutes).padStart(2, "0")}{" "}
                       {duration.includePayment
-                        ? " " + String(duration.price) + "€"
+                        ? " " + "(" + String(duration.price) + " €)"
                         : " (Free)"}
                     </SelectItem>
                   ))}
