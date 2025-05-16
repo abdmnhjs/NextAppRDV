@@ -234,10 +234,9 @@ export function AvailabilityPicker({
                 <FormControl>
                   <Input
                     type="number"
-                    min={0}
+                    min={0.01}
                     step="0.01"
-                    placeholder="0.00"
-                    value={field.value || ""}
+                    value={0.01}
                     onChange={(e) => {
                       const value =
                         e.target.value === "" ? 0 : parseFloat(e.target.value);

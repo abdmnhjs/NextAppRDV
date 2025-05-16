@@ -247,7 +247,14 @@ export default function HomeConsultant({ username, id }: Props) {
             {availabilities.map((item, index) => (
               <div key={index} className="text-white bg-black p-4 rounded-lg">
                 <p>
-                  <strong>{item.day}</strong>
+                  <strong>
+                    {item.day}
+                    {item.includePayment ? (
+                      <span> ({item.price}€)</span>
+                    ) : (
+                      <span> (Free)</span>
+                    )}
+                  </strong>
                 </p>
                 <p>
                   {item.startHour ?? 0}h

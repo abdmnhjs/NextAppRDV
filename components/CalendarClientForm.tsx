@@ -46,6 +46,8 @@ type ConsultancyDuration = {
   endHour: number;
   endMinutes: number;
   availabilityId: number;
+  includePayment: boolean;
+  price?: number;
 };
 
 type Appointment = {
@@ -246,7 +248,10 @@ export function CalendarClientForm({
                       {String(duration.startHour).padStart(2, "0")}h
                       {String(duration.startMinutes).padStart(2, "0")} -{" "}
                       {String(duration.endHour).padStart(2, "0")}h
-                      {String(duration.endMinutes).padStart(2, "0")}
+                      {String(duration.endMinutes).padStart(2, "0")}{" "}
+                      {duration.includePayment
+                        ? " " + String(duration.price) + "€"
+                        : " (Free)"}
                     </SelectItem>
                   ))}
                 </SelectContent>

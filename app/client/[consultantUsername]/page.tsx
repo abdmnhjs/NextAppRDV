@@ -23,6 +23,8 @@ type AvailabilityType = {
   endHour: number;
   endMinutes: number;
   booked: boolean;
+  includePayment: boolean;
+  price?: number;
 };
 
 type AppointmentType = {
@@ -109,6 +111,8 @@ export default function ConsultantPage({
       endHour: availability.endHour,
       endMinutes: availability.endMinutes,
       availabilityId: availability.id,
+      includePayment: availability.includePayment,
+      price: availability.price,
     }));
 
   const availableDays = [...new Set(durations.map((duration) => duration.day))];
