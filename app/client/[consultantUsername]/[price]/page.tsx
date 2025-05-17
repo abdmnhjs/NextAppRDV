@@ -83,11 +83,13 @@ export default function CheckoutForm({
           throw new Error("Invalid price");
         }
 
+        const amountInCents = Math.round(price * 100);
+
         const response = await fetch("/api/create-payment-intent", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            amount: Math.round(price * 100),
+            amount: amountInCents,
             consultantUsername: resolvedParams.consultantUsername,
           }),
         });
@@ -133,6 +135,9 @@ export default function CheckoutForm({
           clientSecret,
           appearance: {
             theme: "stripe",
+            variables: {
+              colorPrimary: "#0066cc",
+            },
           },
         }}
       >

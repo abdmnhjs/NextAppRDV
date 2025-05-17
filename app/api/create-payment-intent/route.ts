@@ -1,48 +1,29 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error("Missing STRIPE_SECRET_KEY environment variable");
-}
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(request: Request) {
   try {
     const { amount, consultantUsername } = await request.json();
 
-    // Validate and adjust amount if necessary
-    if (!amount || typeof amount !== "number") {
-      return NextResponse.json(
-        { error: "Invalid amount: amount must be a number" },
-        { status: 400 }
-      );
-    }
-
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: amount,
+      amount,
       currency: "eur",
       metadata: {
         consultantUsername,
       },
+      payment_method_types: ["card", "paypal", "klarna"],
       automatic_payment_methods: {
-        enabled: true,
+        enabled: false,
       },
     });
 
-    return NextResponse.json({
-      clientSecret: paymentIntent.client_secret,
-      amount: amount,
-    });
+    return NextResponse.json({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
     console.error("Payment intent creation error:", error);
     return NextResponse.json(
-      {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Error creating payment intent",
-      },
+      { error: "Error creating payment intent" },
       { status: 500 }
     );
   }
