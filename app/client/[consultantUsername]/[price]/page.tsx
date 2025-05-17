@@ -13,7 +13,11 @@ const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? ""
 );
 
-function PaymentForm() {
+type PaymentFormProps = {
+  consultantUsername: string;
+};
+
+function PaymentForm({ consultantUsername }: PaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +32,7 @@ function PaymentForm() {
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${window.location.origin}/payment/success`,
+        return_url: `${window.location.origin}/payment/success?consultantUsername=${consultantUsername}`,
       },
     });
 
@@ -77,10 +81,11 @@ export default function CheckoutForm({
 
       try {
         const parsedData = JSON.parse(storedData);
-        const price = Number(parsedData.price);
+        // Access price from selectedDuration
+        const price = Number(parsedData.selectedDuration.price);
 
         if (isNaN(price) || price <= 0) {
-          throw new Error("Invalid price");
+          throw new Error(`Invalid price: ${price}`);
         }
 
         const amountInCents = Math.round(price * 100);
@@ -105,7 +110,10 @@ export default function CheckoutForm({
           throw new Error("No client secret received");
         }
       } catch (error) {
-        console.error("Error:", error);
+        console.error("Error details:", {
+          error,
+          storedData: sessionStorage.getItem("pendingData"),
+        });
         setError(error instanceof Error ? error.message : "An error occurred");
       } finally {
         setLoading(false);
@@ -141,7 +149,7 @@ export default function CheckoutForm({
           },
         }}
       >
-        <PaymentForm />
+        <PaymentForm consultantUsername={resolvedParams.consultantUsername} />
       </Elements>
     </div>
   );

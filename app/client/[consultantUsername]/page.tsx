@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import LogoutButton from "@/components/LogoutButton";
 import { Button } from "@/components/ui/button";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, use } from "react";
 import { CalendarClientForm } from "@/components/CalendarClientForm";
 
 type WeekDay =
@@ -35,7 +35,7 @@ type AppointmentType = {
 export default function ConsultantPage({
   params,
 }: {
-  params: { consultantUsername: string };
+  params: Promise<{ consultantUsername: string }>;
 }) {
   const router = useRouter();
   const [consultantUsername, setConsultantUsername] = useState<string>("");
@@ -43,17 +43,18 @@ export default function ConsultantPage({
   const [availabilities, setAvailabilities] = useState<AvailabilityType[]>([]);
   const [appointments, setAppointments] = useState<AppointmentType[]>([]);
 
+  // Unwrap params using React.use()
+  const resolvedParams = use(params);
+
   useEffect(() => {
-    if (params?.consultantUsername) {
-      const username = decodeURIComponent(params.consultantUsername);
-      setConsultantUsername(username);
-    }
+    const username = decodeURIComponent(resolvedParams.consultantUsername);
+    setConsultantUsername(username);
 
     const storedClientUsername = sessionStorage.getItem("clientUsername");
     if (storedClientUsername) {
       setClientUsername(storedClientUsername);
     }
-  }, [params]);
+  }, [resolvedParams.consultantUsername]);
 
   useEffect(() => {
     const fetchAvailabilities = async () => {

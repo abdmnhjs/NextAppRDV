@@ -89,22 +89,26 @@ export function CalendarClientForm({
     try {
       const selectedDuration = durations[parseInt(data.duration)];
 
+      if (!selectedDuration) {
+        throw new Error("Invalid duration selected");
+      }
+
       if (selectedDuration.includePayment) {
+        // Format the date to YYYY-MM-DD
+        const formattedDate = format(data.doa, "yyyy-MM-dd");
+
+        // Store both duration and date
         sessionStorage.setItem(
           "pendingData",
           JSON.stringify({
-            price: selectedDuration.price,
-            consultantUsername: consultantUsername,
-            clientUsername: clientUsername,
-            id: selectedDuration.availabilityId,
+            selectedDuration,
+            date: formattedDate,
           })
         );
+
+        // Navigate to payment page
         router.push(`/client/${consultantUsername}/${selectedDuration.price}`);
         return;
-      }
-
-      if (!selectedDuration) {
-        throw new Error("Invalid duration selected");
       }
 
       // Formater la date au format YYYY-MM-DD
@@ -138,12 +142,7 @@ export function CalendarClientForm({
       // Rediriger vers une page de succès ou rafraîchir la page
       window.location.reload();
     } catch (error) {
-      console.error("Error creating appointment:", error);
-      alert(
-        error instanceof Error
-          ? error.message
-          : "Failed to create appointment. Please try again."
-      );
+      console.error("Form submission error:", error);
     }
   }
 
