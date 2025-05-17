@@ -236,7 +236,6 @@ export function AvailabilityPicker({
                     type="number"
                     min={0.01}
                     step="0.01"
-                    value={0.01}
                     onChange={(e) => {
                       const value =
                         e.target.value === "" ? 0 : parseFloat(e.target.value);

@@ -29,6 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useRouter } from "next/navigation";
 
 const FormSchema = z.object({
   doa: z.date({
@@ -70,6 +71,7 @@ export function CalendarClientForm({
   consultantUsername,
   appointments,
 }: Props) {
+  const router = useRouter();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
@@ -88,6 +90,17 @@ export function CalendarClientForm({
       const selectedDuration = durations[parseInt(data.duration)];
 
       if (selectedDuration.includePayment) {
+        sessionStorage.setItem(
+          "pendingData",
+          JSON.stringify({
+            price: selectedDuration.price,
+            consultantUsername: consultantUsername,
+            clientUsername: clientUsername,
+            id: selectedDuration.availabilityId,
+          })
+        );
+        router.push(`/client/${consultantUsername}/${selectedDuration.price}`);
+        return;
       }
 
       if (!selectedDuration) {
