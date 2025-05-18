@@ -83,19 +83,9 @@ export default function ConsultantPage({
     router.push("/client");
   };
 
-  const durations = availabilities
-    .filter((availability) => !availability.booked)
-    .map((availability) => ({
-      day: availability.day,
-      startHour: availability.startHour,
-      startMinutes: availability.startMinutes,
-      endHour: availability.endHour,
-      endMinutes: availability.endMinutes,
-      id: availability.id,
-      includePayment: availability.includePayment,
-      price: availability.price,
-      booked: availability.booked,
-    }));
+  const durations = availabilities.filter(
+    (availability) => !availability.booked
+  );
 
   const availableDays = [...new Set(durations.map((duration) => duration.day))];
 
