@@ -21,7 +21,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Vérifier si les utilisateurs existent
     const [consultant, client] = await Promise.all([
       prisma.user.findUnique({
         where: { username: consultantUsername },
@@ -59,7 +58,6 @@ export async function POST(request: NextRequest) {
         clientUsername,
         availabilityId,
         date: new Date(date).toISOString(),
-        
       },
     });
 

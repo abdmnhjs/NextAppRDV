@@ -43,7 +43,6 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const { id, username, availability } = await request.json();
-    console.log("Received data:", { id, username, availability });
 
     const consultantId = await getConsultantId(id, username);
 
@@ -83,10 +82,8 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const { id, availability } = await request.json();
-    console.log("DELETE request received:", { id, availability });
 
     if (!id || !availability || !availability.id) {
-      console.error("Missing required fields:", { id, availability });
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -94,7 +91,6 @@ export async function DELETE(request: NextRequest) {
     }
 
     const consultantId = await getConsultantId(id, null);
-    console.log("Consultant ID:", consultantId);
 
     if (!consultantId) {
       console.error("Invalid consultant ID:", id);
@@ -114,7 +110,6 @@ export async function DELETE(request: NextRequest) {
         appointments: true,
       },
     });
-    console.log("Existing availability:", existingAvailability);
 
     if (!existingAvailability) {
       console.error("Availability not found:", {
@@ -132,10 +127,6 @@ export async function DELETE(request: NextRequest) {
       existingAvailability.appointments &&
       existingAvailability.appointments.length > 0
     ) {
-      console.log(
-        "Deleting associated appointments:",
-        existingAvailability.appointments
-      );
       await prisma.appointment.deleteMany({
         where: {
           availabilityId: availability.id,
@@ -143,14 +134,12 @@ export async function DELETE(request: NextRequest) {
       });
     }
 
-    // Supprimer la disponibilité
     try {
-      const deletedAvailability = await prisma.availability.delete({
+      await prisma.availability.delete({
         where: {
           id: availability.id,
         },
       });
-      console.log("Deleted availability:", deletedAvailability);
 
       return NextResponse.json({
         message: "Availability deleted successfully",

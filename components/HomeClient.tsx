@@ -16,6 +16,7 @@ type Consultant = {
 
 export default function HomeClient({ username }: Props) {
   const [consultants, setConsultants] = useState<Consultant[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -26,6 +27,8 @@ export default function HomeClient({ username }: Props) {
         setConsultants(data);
       } catch (error) {
         console.error("Failed to fetch consultants: ", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -36,6 +39,14 @@ export default function HomeClient({ username }: Props) {
     sessionStorage.setItem("clientUsername", username);
     router.push(`/client/${consultant.username}`);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div>

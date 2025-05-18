@@ -15,7 +15,7 @@ export default function CheckoutForm({
   params: Promise<{ consultantUsername: string; price: string }>;
 }) {
   const [clientSecret, setClientSecret] = useState<string>();
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const resolvedParams = use(params);
@@ -25,7 +25,7 @@ export default function CheckoutForm({
       const storedData = sessionStorage.getItem("pendingData");
       if (!storedData) {
         setError("No appointment data found");
-        setLoading(false);
+        setIsLoading(false);
         return;
       }
 
@@ -62,15 +62,19 @@ export default function CheckoutForm({
         });
         setError(error instanceof Error ? error.message : "An error occurred");
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
     fetchPaymentIntent();
   }, [resolvedParams.consultantUsername]);
 
-  if (loading) {
-    return <div className="p-4">Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
   }
 
   if (error) {

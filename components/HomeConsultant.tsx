@@ -20,7 +20,7 @@ export default function HomeConsultant({ username, id }: Props) {
   const [bookedAppointments, setBookedAppointments] = useState<
     Record<number, Appointment>
   >({});
-
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     const fetchAvailabilities = async () => {
       try {
@@ -43,6 +43,8 @@ export default function HomeConsultant({ username, id }: Props) {
         }
       } catch (error) {
         console.error("Failed to fetch availabilities:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -92,8 +94,6 @@ export default function HomeConsultant({ username, id }: Props) {
 
   const handleDeleteAvailability = async (availability: Availability) => {
     try {
-      console.log("Attempting to delete availability:", availability);
-
       const response = await fetch("/api/availabilities", {
         method: "DELETE",
         headers: {
@@ -115,12 +115,10 @@ export default function HomeConsultant({ username, id }: Props) {
       });
 
       const data = await response.json();
-      console.log("Response from server:", data);
 
       if (!response.ok) {
         const errorMessage =
           data.error || data.details || "Failed to delete availability";
-        console.error("Server error:", errorMessage);
         throw new Error(errorMessage);
       }
 
@@ -157,6 +155,13 @@ export default function HomeConsultant({ username, id }: Props) {
       return null;
     }
   };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div>

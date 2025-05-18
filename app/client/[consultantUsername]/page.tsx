@@ -17,6 +17,8 @@ export default function ConsultantPage({
   const [clientUsername, setClientUsername] = useState<string>("");
   const [availabilities, setAvailabilities] = useState<Availability[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [isLoadingAvailabilities, setIsLoadingAvailabilities] = useState(true);
+  const [isLoadingAppointments, setIsLoadingAppointments] = useState(true);
 
   const resolvedParams = use(params);
 
@@ -48,6 +50,8 @@ export default function ConsultantPage({
       } catch (error) {
         console.error("Failed to fetch availabilities:", error);
         setAvailabilities([]);
+      } finally {
+        setIsLoadingAvailabilities(false);
       }
     };
 
@@ -66,6 +70,8 @@ export default function ConsultantPage({
       } catch (error) {
         console.error("Failed to fetch appointments:", error);
         setAppointments([]);
+      } finally {
+        setIsLoadingAppointments(false);
       }
     };
 
@@ -92,6 +98,14 @@ export default function ConsultantPage({
     }));
 
   const availableDays = [...new Set(durations.map((duration) => duration.day))];
+
+  if (isLoadingAppointments && isLoadingAvailabilities) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div>
