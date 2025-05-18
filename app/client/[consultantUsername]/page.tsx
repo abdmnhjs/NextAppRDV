@@ -5,32 +5,7 @@ import LogoutButton from "@/components/LogoutButton";
 import { Button } from "@/components/ui/button";
 import React, { useEffect, useState, use } from "react";
 import { CalendarClientForm } from "@/components/CalendarClientForm";
-
-type WeekDay =
-  | "Monday"
-  | "Tuesday"
-  | "Wednesday"
-  | "Thursday"
-  | "Friday"
-  | "Saturday"
-  | "Sunday";
-
-type AvailabilityType = {
-  id: number;
-  day: WeekDay;
-  startHour: number;
-  startMinutes: number;
-  endHour: number;
-  endMinutes: number;
-  booked: boolean;
-  includePayment: boolean;
-  price?: number;
-};
-
-type AppointmentType = {
-  date: string;
-  availabilityId: number;
-};
+import { Appointment, Availability } from "@/app/types/types";
 
 export default function ConsultantPage({
   params,
@@ -40,10 +15,9 @@ export default function ConsultantPage({
   const router = useRouter();
   const [consultantUsername, setConsultantUsername] = useState<string>("");
   const [clientUsername, setClientUsername] = useState<string>("");
-  const [availabilities, setAvailabilities] = useState<AvailabilityType[]>([]);
-  const [appointments, setAppointments] = useState<AppointmentType[]>([]);
+  const [availabilities, setAvailabilities] = useState<Availability[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
 
-  // Unwrap params using React.use()
   const resolvedParams = use(params);
 
   useEffect(() => {
@@ -111,9 +85,10 @@ export default function ConsultantPage({
       startMinutes: availability.startMinutes,
       endHour: availability.endHour,
       endMinutes: availability.endMinutes,
-      availabilityId: availability.id,
+      id: availability.id,
       includePayment: availability.includePayment,
       price: availability.price,
+      booked: availability.booked,
     }));
 
   const availableDays = [...new Set(durations.map((duration) => duration.day))];

@@ -40,7 +40,6 @@ export function SignInForm() {
     });
 
     if (res?.ok) {
-      // Recharge la session pour avoir l'utilisateur connecté
       const session = await getSession();
 
       if (!session?.user?.role) {
@@ -53,9 +52,6 @@ export function SignInForm() {
       } else if (session.user.role === "client") {
         router.push("/client");
       }
-    } else {
-      console.error("Login failed:", res);
-      // Afficher un message d'erreur à l'utilisateur
     }
   }
 

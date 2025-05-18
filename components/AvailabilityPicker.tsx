@@ -24,7 +24,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 
-// Liste des jours de la semaine
 const weekDays = [
   "Monday",
   "Tuesday",

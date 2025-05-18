@@ -50,7 +50,6 @@ export function SignUpForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      // Make an API call to your server-side endpoint that handles database operations
       const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: {
@@ -65,8 +64,10 @@ export function SignUpForm() {
 
       setIsSubmit(true);
       setErrorMessage("");
-    } catch {
-      setErrorMessage("Failed to create account. Please try again.");
+    } catch (e) {
+      setErrorMessage(
+        "Failed to create account. Please try again. Error :" + e
+      );
     }
   }
 

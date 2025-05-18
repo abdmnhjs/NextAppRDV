@@ -7,46 +7,18 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { AvailabilityPicker } from "@/components/AvailabilityPicker";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { format } from "date-fns";
+import { Appointment, Availability } from "@/app/types/types";
 
 interface Props {
   username: string;
   id: number;
 }
 
-type WeekDay =
-  | "Monday"
-  | "Tuesday"
-  | "Wednesday"
-  | "Thursday"
-  | "Friday"
-  | "Saturday"
-  | "Sunday";
-
-type AvailabilityType = {
-  id: number;
-  day: WeekDay;
-  startHour: number;
-  startMinutes: number;
-  endHour: number;
-  endMinutes: number;
-  booked: boolean;
-  includePayment: boolean;
-  price?: number;
-};
-
-type AppointmentType = {
-  id: number;
-  consultantUsername: string;
-  clientUsername: string;
-  availabilityId: number;
-  date: string;
-};
-
 export default function HomeConsultant({ username, id }: Props) {
-  const [availabilities, setAvailabilities] = useState<AvailabilityType[]>([]);
+  const [availabilities, setAvailabilities] = useState<Availability[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [bookedAppointments, setBookedAppointments] = useState<
-    Record<number, AppointmentType>
+    Record<number, Appointment>
   >({});
 
   useEffect(() => {
@@ -56,15 +28,12 @@ export default function HomeConsultant({ username, id }: Props) {
         const data = await response.json();
         setAvailabilities(data);
 
-        // Fetch appointments for booked availabilities
         const bookedAvailabilities = data.filter(
-          (item: AvailabilityType) => item.booked
+          (item: Availability) => item.booked
         );
-        console.log("Booked availabilities:", bookedAvailabilities); // Debug log
 
         for (const availability of bookedAvailabilities) {
           const appointment = await getBookedBy(availability);
-          console.log("Fetched appointment:", appointment); // Debug log
           if (appointment) {
             setBookedAppointments((prev) => ({
               ...prev,
@@ -81,18 +50,9 @@ export default function HomeConsultant({ username, id }: Props) {
   }, [id]);
 
   const handleAddAvailability = async (
-    newAvailability: Omit<AvailabilityType, "id" | "booked">
+    newAvailability: Omit<Availability, "id" | "booked">
   ) => {
     try {
-      console.log("Sending availability data:", {
-        id,
-        availability: {
-          ...newAvailability,
-          booked: false,
-          includePayment: newAvailability.includePayment ?? false,
-        },
-      });
-
       const response = await fetch("/api/availabilities", {
         method: "POST",
         headers: {
@@ -119,11 +79,9 @@ export default function HomeConsultant({ username, id }: Props) {
       }
 
       const data = await response.json();
-      console.log("New availability data:", data);
       setAvailabilities((prev) => [...prev, data]);
       setIsDialogOpen(false);
     } catch (error) {
-      console.error("Failed to add availability:", error);
       alert(
         `Failed to add availability: ${
           error instanceof Error ? error.message : "Unknown error"
@@ -132,7 +90,7 @@ export default function HomeConsultant({ username, id }: Props) {
     }
   };
 
-  const handleDeleteAvailability = async (availability: AvailabilityType) => {
+  const handleDeleteAvailability = async (availability: Availability) => {
     try {
       console.log("Attempting to delete availability:", availability);
 
@@ -166,11 +124,9 @@ export default function HomeConsultant({ username, id }: Props) {
         throw new Error(errorMessage);
       }
 
-      console.log("Successfully deleted availability:", data);
       setAvailabilities((prev) =>
         prev.filter((item) => item.id !== availability.id)
       );
-      // Remove from booked appointments if it was booked
       if (availability.booked) {
         setBookedAppointments((prev) => {
           const newState = { ...prev };
@@ -179,33 +135,22 @@ export default function HomeConsultant({ username, id }: Props) {
         });
       }
     } catch (error) {
-      console.error("Failed to delete availability:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
-      console.error("Detailed error:", errorMessage);
       alert(`Failed to delete availability: ${errorMessage}`);
     }
   };
 
   const getBookedBy = async (
-    availability: AvailabilityType
-  ): Promise<AppointmentType | null> => {
+    availability: Availability
+  ): Promise<Appointment | null> => {
     try {
       const response = await fetch(`/api/appointments`);
       const data = await response.json();
-      console.log("Appointment data:", data); // Debug log
-      // Trouver le rendez-vous qui correspond à cette disponibilité
       const appointment = data.find(
-        (app: AppointmentType) => app.availabilityId === availability.id
+        (app: Appointment) => app.availabilityId === availability.id
       );
-      console.log("Found appointment:", appointment); // Debug log
-      if (appointment) {
-        console.log("Appointment date:", appointment.date); // Debug log
-        console.log(
-          "Formatted date:",
-          format(new Date(appointment.date), "dd/MM/yyyy")
-        ); // Debug log
-      }
+
       return appointment || null;
     } catch (error) {
       console.error("Failed to fetch appointment:", error);

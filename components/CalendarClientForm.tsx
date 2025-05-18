@@ -30,6 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
+import { Appointment, Availability } from "@/app/types/types";
 
 const FormSchema = z.object({
   doa: z.date({
@@ -40,25 +41,9 @@ const FormSchema = z.object({
   }),
 });
 
-type ConsultancyDuration = {
-  day: string;
-  startHour: number;
-  startMinutes: number;
-  endHour: number;
-  endMinutes: number;
-  availabilityId: number;
-  includePayment: boolean;
-  price?: number;
-};
-
-type Appointment = {
-  date: string;
-  availabilityId: number;
-};
-
 type Props = {
   days: string[];
-  durations: ConsultancyDuration[];
+  durations: Availability[];
   clientUsername: string;
   consultantUsername: string;
   appointments: Appointment[];
@@ -76,7 +61,6 @@ export function CalendarClientForm({
     resolver: zodResolver(FormSchema),
   });
 
-  // Filtrer les horaires en fonction du jour sélectionné
   const getFilteredDurations = () => {
     const selectedDate = form.watch("doa");
     if (!selectedDate) return durations;
@@ -94,24 +78,24 @@ export function CalendarClientForm({
       }
 
       if (selectedDuration.includePayment) {
-        // Format the date to YYYY-MM-DD
+        // Format the date
         const formattedDate = format(data.doa, "yyyy-MM-dd");
 
-        // Store both duration and date
-        sessionStorage.setItem(
-          "pendingData",
-          JSON.stringify({
-            selectedDuration,
-            date: formattedDate,
-          })
-        );
+        // Store complete data
+        const pendingData = {
+          selectedDuration: {
+            ...selectedDuration,
+            availabilityId: selectedDuration.id,
+          },
+          date: formattedDate,
+        };
 
-        // Navigate to payment page
+        sessionStorage.setItem("pendingData", JSON.stringify(pendingData));
+
         router.push(`/client/${consultantUsername}/${selectedDuration.price}`);
         return;
       }
 
-      // Formater la date au format YYYY-MM-DD
       const formattedDate = format(data.doa, "yyyy-MM-dd");
 
       const response = await fetch("/api/appointments", {
@@ -122,7 +106,7 @@ export function CalendarClientForm({
         body: JSON.stringify({
           consultantUsername,
           clientUsername,
-          availabilityId: selectedDuration.availabilityId,
+          availabilityId: selectedDuration.id,
           date: formattedDate,
         }),
       });
@@ -136,11 +120,6 @@ export function CalendarClientForm({
             "Failed to create appointment"
         );
       }
-
-      console.log("Appointment created successfully:", responseData);
-
-      // Rediriger vers une page de succès ou rafraîchir la page
-      window.location.reload();
     } catch (error) {
       console.error("Form submission error:", error);
     }
@@ -150,12 +129,10 @@ export function CalendarClientForm({
     const weekday = format(date, "EEEE");
     const selectedDuration = form.watch("duration");
 
-    // Vérifier si le jour de la semaine est disponible
     if (!days.includes(weekday)) {
       return false;
     }
 
-    // Vérifier si la date est déjà réservée
     const dateStr = format(date, "yyyy-MM-dd");
     const isDateBooked = appointments.some((appointment) => {
       const appointmentDate = new Date(appointment.date);
@@ -166,7 +143,6 @@ export function CalendarClientForm({
       return false;
     }
 
-    // Si une durée est sélectionnée, vérifier si elle est disponible pour ce jour
     if (selectedDuration) {
       const duration = durations[parseInt(selectedDuration)];
       return durations.some(

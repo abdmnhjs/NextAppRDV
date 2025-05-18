@@ -32,9 +32,7 @@ export default function HomeClient({ username }: Props) {
     fetchConsultants();
   }, []);
 
-  // Function to handle navigation to the consultant page
   const handleConsultantClick = (consultant: Consultant) => {
-    // Store client username in sessionStorage so it's available in ConsultantPage
     sessionStorage.setItem("clientUsername", username);
     router.push(`/client/${consultant.username}`);
   };
