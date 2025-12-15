@@ -3,9 +3,8 @@
 
 # ⚙️ Features:
 
-- Search posts by keywords (and the keywords are saved)
-- Add posts to favourites
-- Resume of the posts by Google Gemini (gemini-2.5-flash)
+- Create appointments (free or not) if you are a consultant
+- Book appointments if you are a client, by buying it or not
 
 # 🚀 Getting Started :
 
@@ -13,18 +12,18 @@
 - Node.js (≥ 18)
 - npm
 - PostgreSQL (≥ 9.5)
-- An account for using the Reddit API
+- A Stripe account
 
 ### 🏗️ Setup :
 
 1. In your terminal, clone the repo
 ```bash
-git clone https://github.com/abdmnhjs/RDT-Hunter.git
+git clone https://github.com/abdmnhjs/NextAppRDV.git
 ```
 
 2. Move into the project folder
 ```bash
-cd RDT-Hunter
+cd NextAppRDV
 ```
 
 3. Create a .env file and add these environment variables :
