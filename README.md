@@ -3,7 +3,7 @@
 
 # ⚙️ Features:
 
-- Create appointments (free or not) if you are a consultant
+- Create appointments (for free or not) if you are a consultant
 - Book appointments if you are a client, by buying it or not
 
 # 🚀 Getting Started :
@@ -28,15 +28,12 @@ cd NextAppRDV
 
 3. Create a .env file and add these environment variables :
 ```bash
-# Replace [client-id] and [client-secret] with your own values from your reddit api account
+# Replace [stripe-secret-key] by your Stripe secret key in the sandbox, it must begin by sk_test, do not use the key for real transactions but only for testing please
 # Replace [username] and [password] with your own PostgreSQL credentials
-# Replace [gemini-api-key] by the api key you created in Google AI Studio
 # You define the database name when creating the variable
-# Example: postgresql://postgres:mypassword@localhost:5432/rdt-hunter-db
+# Example: postgresql://postgres:mypassword@localhost:5432/next-app-rdv-db
 DATABASE_URL=postgresql://[username]:[password]@localhost:5432/[database-name]
-REDDIT_CLIENT_ID=[client-id]
-REDDIT_SECRET=[client-secret]
-GEMINI_API_KEY=[gemini-api-key]
+STRIPE_SECRET_KEY=[stripe-secret-key]
 ```
 
 4. Install the dependencies
