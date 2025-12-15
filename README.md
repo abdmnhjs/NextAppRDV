@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💻 Tech Stack:
+![Next JS](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white) ![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white) ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white) ![Stripe](https://img.shields.io/badge/Stripe-%23FF4500.svg?style=for-the-badge&logo=Stripe&logoColor=white) ![Google Gemini](https://img.shields.io/badge/google%20gemini-8E75B2?style=for-the-badge&logo=google%20gemini&logoColor=white)
 
-## Getting Started
+# ⚙️ Features:
 
-First, run the development server:
+- Search posts by keywords (and the keywords are saved)
+- Add posts to favourites
+- Resume of the posts by Google Gemini (gemini-2.5-flash)
 
+# 🚀 Getting Started :
+
+### 📦 Prerequisites :
+- Node.js (≥ 18)
+- npm
+- PostgreSQL (≥ 9.5)
+- An account for using the Reddit API
+
+### 🏗️ Setup :
+
+1. In your terminal, clone the repo
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/abdmnhjs/RDT-Hunter.git
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Move into the project folder
+```bash
+cd RDT-Hunter
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Create a .env file and add these environment variables :
+```bash
+# Replace [client-id] and [client-secret] with your own values from your reddit api account
+# Replace [username] and [password] with your own PostgreSQL credentials
+# Replace [gemini-api-key] by the api key you created in Google AI Studio
+# You define the database name when creating the variable
+# Example: postgresql://postgres:mypassword@localhost:5432/rdt-hunter-db
+DATABASE_URL=postgresql://[username]:[password]@localhost:5432/[database-name]
+REDDIT_CLIENT_ID=[client-id]
+REDDIT_SECRET=[client-secret]
+GEMINI_API_KEY=[gemini-api-key]
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Install the dependencies
+```bash
+npm i
+```
 
-## Learn More
+5. Generate the prisma client
+```bash
+npx prisma generate
+```
 
-To learn more about Next.js, take a look at the following resources:
+6. Apply the migrations (this will create the tables in your database according to the Prisma schema)
+```bash
+npx prisma migrate dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+7. Run the web server
+```bash
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
